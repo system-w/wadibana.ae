@@ -1,10 +1,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
-import { initializeAppCheck, ReCaptchaEnterpriseProvider } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app-check.js";
 import { getDatabase, ref, onValue, set, get, remove, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-database.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, updatePassword, signOut } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
 import { getAnalytics, isSupported as isAnalyticsSupported } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-analytics.js";
 import { AUTH_EMAIL_DOMAIN } from "./auth-config.mjs";
-import { firebaseAppCheckSiteKey, firebaseConfig } from "./firebase-config.js";
+import { firebaseConfig } from "./firebase-config.js";
 import { parseOmanEvisaText, validateTransitRecord } from "./transit-parser.js";
 
 const { jsPDF } = window.jspdf;
@@ -20,10 +19,6 @@ try {
         throw new Error(`إعدادات Firebase ناقصة: ${missingFirebaseKeys.join(', ')}`);
     }
     const app = initializeApp(firebaseConfig);
-    initializeAppCheck(app, {
-        provider: new ReCaptchaEnterpriseProvider(firebaseAppCheckSiteKey),
-        isTokenAutoRefreshEnabled: true
-    });
     rtdb = getDatabase(app);
     auth = getAuth(app);
     isAnalyticsSupported()
