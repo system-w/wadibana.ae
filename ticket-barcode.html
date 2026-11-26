@@ -73,11 +73,16 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
+    import { initializeAppCheck, ReCaptchaV3Provider } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app-check.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
     import { getDatabase, ref, get, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-database.js";
-    import { firebaseConfig } from "./assets/js/firebase-config.js";
+    import { firebaseAppCheckSiteKey, firebaseConfig } from "./assets/js/firebase-config.js";
 
     const app = initializeApp(firebaseConfig);
+    initializeAppCheck(app, {
+      provider: new ReCaptchaV3Provider(firebaseAppCheckSiteKey),
+      isTokenAutoRefreshEnabled: true
+    });
     const auth = getAuth(app);
     const db = getDatabase(app);
     let passengerRecords = [];
