@@ -1,0 +1,11 @@
+{
+  "name": "wadibana-firebase-user-migration",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "import-users": "node import-legacy-users.mjs"
+  },
+  "dependencies": {
+    "firebase-admin": "^14.5.1"
+  }
+}

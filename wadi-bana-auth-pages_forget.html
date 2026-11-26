@@ -53,67 +53,17 @@
         <i class="fa-solid fa-key fa-2x text-gold"></i>
       </div>
       <h4 class="fw-black text-gold mb-1">استعادة كلمة المرور</h4>
-      <p class="text-secondary small mb-0">أدخل البريد الإلكتروني المرتبط بحسابك لإرسال رابط آمن لإعادة تعيين كلمة المرور.</p>
+      <p class="text-secondary small mb-0">حسابات الدخول مرتبطة باسم المستخدم ولا تحتوي على بريد لاستعادة كلمة المرور. تواصل مع مسؤول النظام لإصدار كلمة مرور مؤقتة جديدة.</p>
     </div>
-
-    <div id="forgetAlert" class="alert d-none py-2 small fw-bold text-center" role="alert"></div>
-
-    <form id="forgetPasswordForm" onsubmit="handleForgetSubmit(event)">
-      <div class="mb-3">
-        <label for="forgetEmail" class="form-label small fw-bold">البريد الإلكتروني المسجل</label>
-        <div class="input-group">
-          <span class="input-group-text bg-dark border-secondary text-gold"><i class="fa-solid fa-envelope"></i></span>
-          <input type="email" id="forgetEmail" class="form-control bg-dark text-light border-secondary" autocomplete="email" placeholder="name@example.com" required />
-        </div>
-      </div>
-
-      <button type="submit" id="btnForgetSubmit" class="btn btn-gold w-100 py-2 mb-3">
-        <i class="fa-solid fa-paper-plane ms-1"></i> إرسال رابط الاستعادة
-      </button>
-
-      <div class="d-grid gap-2">
-        <a href="login.html" class="btn btn-outline-secondary btn-sm fw-bold">
-          <i class="fa-solid fa-arrow-right ms-1"></i> العودة إلى صفحة تسجيل الدخول
-        </a>
-      </div>
-    </form>
+    <div class="d-grid gap-2">
+      <a href="login.html" class="btn btn-outline-secondary btn-sm fw-bold">
+        <i class="fa-solid fa-arrow-right ms-1"></i> العودة إلى صفحة تسجيل الدخول
+      </a>
+    </div>
 
     <div class="text-center mt-4 pt-3 border-top border-secondary border-opacity-50">
       <small class="text-secondary">للدعم الفني الفوري: الإدارة العامة - شركة وادي بناء للنقل الدولي</small>
     </div>
   </div>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
-    import { getAuth, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
-    import { firebaseConfig } from "./assets/js/firebase-config.js";
-
-    const auth = getAuth(initializeApp(firebaseConfig));
-
-    window.handleForgetSubmit = async function (e) {
-      e.preventDefault();
-      const email = document.getElementById('forgetEmail').value.trim().toLowerCase();
-      const alertBox = document.getElementById('forgetAlert');
-      const btn = document.getElementById('btnForgetSubmit');
-
-      btn.disabled = true;
-      btn.innerHTML = '<span class="spinner-border spinner-border-sm ms-1"></span> جارٍ إرسال الرابط...';
-
-      try {
-        await sendPasswordResetEmail(auth, email);
-        alertBox.className = 'alert alert-success py-2 small fw-bold text-center';
-        alertBox.textContent = 'إذا كان البريد مرتبطاً بحساب، فسيصلك رابط إعادة تعيين كلمة المرور.';
-      } catch (err) {
-        console.error('Password reset email failed:', err);
-        alertBox.className = 'alert alert-warning py-2 small fw-bold text-center';
-        alertBox.textContent = err.code === 'auth/user-not-found'
-          ? 'إذا كان البريد مرتبطاً بحساب، فسيصلك رابط إعادة تعيين كلمة المرور.'
-          : 'تعذر إرسال رابط الاستعادة. تحقق من تفعيل Email/Password وإعداد النطاق في Firebase Console ثم حاول مجدداً.';
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-paper-plane ms-1"></i> إرسال رابط الاستعادة';
-      }
-    };
-  </script>
 </body>
 </html>

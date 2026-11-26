@@ -23,8 +23,8 @@
         <p id="lgSub" class="text-zinc-400 text-sm mt-1">سجّل الدخول للمتابعة عبر أقسام النظام</p>
         <p id="cloudInitError" class="hidden text-red-400 text-xs mt-3" role="alert"></p>
         <form onsubmit="handleLogin(event)" class="mt-5">
-          <label for="loginUser" class="block text-xs font-bold text-zinc-300 mb-2">البريد الإلكتروني</label>
-          <div class="login-field mb-4"><i class="fa-solid fa-envelope"></i><input id="loginUser" type="email" autocomplete="email" required placeholder="name@swd.ae"></div>
+          <label for="loginUser" class="block text-xs font-bold text-zinc-300 mb-2">اسم المستخدم</label>
+          <div class="login-field mb-4"><i class="fa-solid fa-user"></i><input id="loginUser" type="text" autocomplete="username" required placeholder="اسم المستخدم"></div>
           <label for="loginPass" class="block text-xs font-bold text-zinc-300 mb-2">كلمة المرور</label>
           <div class="login-field mb-6"><i class="fa-solid fa-lock"></i><input id="loginPass" type="password" autocomplete="current-password" required placeholder="••••••••"></div>
           <button id="lgBtn" type="submit" class="login-submit w-full gold-gradient-bg text-black font-extrabold py-3.5 rounded-xl">دخول النظام <i class="fa-solid fa-arrow-left mr-2"></i></button>

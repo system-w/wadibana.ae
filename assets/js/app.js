@@ -2,12 +2,11 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebas
 import { getDatabase, ref, onValue, set, get, remove, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-database.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, updatePassword, signOut } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
 import { getAnalytics, isSupported as isAnalyticsSupported } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-analytics.js";
+import { AUTH_EMAIL_DOMAIN } from "./auth-config.mjs";
 import { firebaseConfig } from "./firebase-config.js";
 import { parseOmanEvisaText, validateTransitRecord } from "./transit-parser.js";
 
 const { jsPDF } = window.jspdf;
-
-const OWNER_EMAIL_DOMAIN_EXCEPTION_UID = 'udn6FSQNEVd0v5HDfnF0mmCxmw53';
 
 let useFirebase = true;
 let rtdb = null;
@@ -298,7 +297,7 @@ const translations = {
         pageTitle: 'شركة وادي بناء للنقل الدولي | لوحة التحكم والنظام الموحد',
         lgTitle: 'تسجيل الدخول للنظام الموحد',
         lgSub: 'أدخل بيانات الحساب المعتمدة للوصول للوحة التحكم',
-        lgUserLbl: 'البريد الإلكتروني', loginUser: 'بريد الشركة (name@swd.ae)', lgPassLbl: 'كلمة المرور', lgBtn: 'دخول النظام',
+        lgUserLbl: 'اسم المستخدم', loginUser: 'اسم المستخدم', lgPassLbl: 'كلمة المرور', lgBtn: 'دخول النظام',
         headTitle: 'شركة وادي بناء للنقل الدولي', headSub: 'النظام الموحد الشامل (Firebase v13.4.0)',
         btnBackup: 'نسخة JSON', btnBackupPDF: 'نسخة احتياطية PDF', btnRestore: 'استرجاع JSON', btnRestorePDF: 'استعادة من PDF', btnLogout: 'خروج',
         tDashboard: 'لوحة التحكم', tPassengers: 'التذاكر والركاب', tCargo: 'فواتير الشحن', tFin: 'الإدارة المالية',
@@ -311,7 +310,7 @@ const translations = {
         pageTitle: 'Wadi Bina Overland Transport | Unified System & Dashboard',
         lgTitle: 'Unified System Login',
         lgSub: 'Enter approved credentials to access the control panel',
-        lgUserLbl: 'Email address', loginUser: 'Company email (name@swd.ae)', lgPassLbl: 'Password', lgBtn: 'Login',
+        lgUserLbl: 'Username', loginUser: 'Username', lgPassLbl: 'Password', lgBtn: 'Login',
         headTitle: 'Wadi Bina Overland Transport', headSub: 'Comprehensive Unified System (Firebase v13.4.0)',
         btnBackup: 'JSON Backup', btnBackupPDF: 'PDF Backup', btnRestore: 'Restore JSON', btnRestorePDF: 'Restore PDF', btnLogout: 'Logout',
         tDashboard: 'Dashboard', tPassengers: 'Tickets & Passengers', tCargo: 'Cargo Invoices', tFin: 'Financial Management',
@@ -521,11 +520,6 @@ async function activateAuthenticatedUser(profileUid) {
     if (!auth?.currentUser || auth.currentUser.uid !== profileUid) {
         throw new Error('جلسة المصادقة غير صالحة.');
     }
-    const authEmail = String(auth.currentUser.email || '').trim().toLowerCase();
-    if (profileUid !== OWNER_EMAIL_DOMAIN_EXCEPTION_UID && !authEmail.endsWith('@swd.ae')) {
-        throw new Error('استخدم بريد الشركة المنتهي بـ @swd.ae.');
-    }
-
     authActivationPromise = (async () => {
         const snapshot = await get(ref(rtdb, `users/${profileUid}`));
         if (!snapshot.exists()) {
@@ -533,6 +527,9 @@ async function activateAuthenticatedUser(profileUid) {
         }
 
         const profile = snapshot.val();
+        if (String(profile.username || '').trim().toLowerCase() !== profileUid.toLowerCase()) {
+            throw new Error('اسم المستخدم لا يطابق معرّف الحساب.');
+        }
         if (profile.active !== true) {
             throw new Error('هذا الحساب موقوف أو غير مفعّل في Firebase.');
         }
@@ -569,10 +566,13 @@ async function handleLogin(e) {
         loginButton.disabled = true;
         loginButton.textContent = 'جاري تسجيل الدخول...';
     }
-    const email = String(loginUserInput?.value || '').trim().toLowerCase();
+    const username = String(loginUserInput?.value || '').trim().toLowerCase();
     const password = loginPassInput?.value || '';
     try {
-        if (!email || !password) throw new Error('أدخل البريد الإلكتروني وكلمة المرور.');
+        if (!/^[a-z0-9_-]{1,64}$/.test(username) || !password) {
+            throw new Error('أدخل اسم مستخدم صالحاً وكلمة المرور.');
+        }
+        const email = `${username}@${AUTH_EMAIL_DOMAIN}`;
         await signInWithEmailAndPassword(auth, email, password);
         await activateAuthenticatedUser(auth.currentUser.uid);
         if (loginPassInput) loginPassInput.value = '';
@@ -4851,8 +4851,8 @@ async function handleSaveUser(e) {
     e.preventDefault();
     if (!requireModuleAccess('users', 'إدارة الحسابات')) return;
     const origUid = document.getElementById('userEditOriginalUid').value;
-    const uid = document.getElementById('manageUid').value.trim();
-    const username = document.getElementById('manageUsername').value.trim();
+    const uid = document.getElementById('manageUid').value.trim().toLowerCase();
+    const username = document.getElementById('manageUsername').value.trim().toLowerCase();
     const email = document.getElementById('manageEmail').value.trim().toLowerCase();
     const creating = !origUid;
     const requestedRole = document.getElementById('manageRole').value;
@@ -4861,15 +4861,11 @@ async function handleSaveUser(e) {
     const branch = isBranchUserManager() ? currentUser.branch : requestedBranch;
     const actorRole = getCurrentRoleCode();
 
-    if (!uid || uid.includes('/') || /[.#$\[\]]/.test(uid)) {
-        alert('أدخل Firebase UID صحيحاً من حساب المستخدم في Firebase Authentication.');
+    if (!/^[a-z0-9_-]{1,64}$/.test(username) || uid !== username) {
+        alert('يجب أن يطابق UID اسم المستخدم وأن يحتوي على أحرف إنجليزية صغيرة أو أرقام أو شرطة فقط.');
         return;
     }
-    if (!username || !email) {
-        alert('أدخل البريد الإلكتروني واسم العرض.');
-        return;
-    }
-    if (!/^[^@\s]+@swd\.ae$/i.test(email)) {
+    if (email && !/^[^@\s]+@swd\.ae$/i.test(email)) {
         alert('يجب أن ينتهي بريد المستخدم بـ @swd.ae.');
         return;
     }
