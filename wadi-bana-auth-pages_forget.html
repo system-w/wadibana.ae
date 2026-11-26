@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-bs-theme="dark" class="dark-style" id="htmlRoot">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>استعادة كلمة المرور | شركة وادي بناء للنقل الدولي</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css" id="bootstrapCss" />
+
+  <style>
+    :root {
+      --bs-body-bg: #09090b;
+      --bs-card-bg: #121215;
+      --gold-primary: #D4AF37;
+      --gold-dark: #AA8C2C;
+      --border-gold: rgba(212, 175, 55, 0.25);
+    }
+    body {
+      font-family: 'Cairo', sans-serif;
+      background: radial-gradient(circle at top left, #1c1917 0%, #09090b 65%);
+      color: #f4f4f5;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .auth-card {
+      background-color: var(--bs-card-bg);
+      border: 1px solid var(--border-gold);
+      border-radius: 1.25rem;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
+      max-width: 430px;
+      width: 100%;
+    }
+    .text-gold { color: var(--gold-primary) !important; }
+    .btn-gold {
+      background: linear-gradient(135deg, #D4AF37 0%, #AA8C2C 100%);
+      color: #000;
+      font-weight: 800;
+      border: none;
+    }
+    .btn-gold:hover { opacity: 0.92; color: #000; }
+  </style>
+</head>
+<body class="p-3">
+
+  <div class="auth-card p-4 p-md-5">
+    <div class="text-center mb-4">
+      <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-warning bg-opacity-10 border border-warning mb-3" style="width: 72px; height: 72px;">
+        <i class="fa-solid fa-key fa-2x text-gold"></i>
+      </div>
+      <h4 class="fw-black text-gold mb-1">استعادة كلمة المرور</h4>
+      <p class="text-secondary small mb-0">أدخل البريد الإلكتروني المرتبط بحسابك لإرسال رابط آمن لإعادة تعيين كلمة المرور.</p>
+    </div>
+
+    <div id="forgetAlert" class="alert d-none py-2 small fw-bold text-center" role="alert"></div>
+
+    <form id="forgetPasswordForm" onsubmit="handleForgetSubmit(event)">
+      <div class="mb-3">
+        <label for="forgetEmail" class="form-label small fw-bold">البريد الإلكتروني المسجل</label>
+        <div class="input-group">
+          <span class="input-group-text bg-dark border-secondary text-gold"><i class="fa-solid fa-envelope"></i></span>
+          <input type="email" id="forgetEmail" class="form-control bg-dark text-light border-secondary" autocomplete="email" placeholder="name@example.com" required />
+        </div>
+      </div>
+
+      <button type="submit" id="btnForgetSubmit" class="btn btn-gold w-100 py-2 mb-3">
+        <i class="fa-solid fa-paper-plane ms-1"></i> إرسال رابط الاستعادة
+      </button>
+
+      <div class="d-grid gap-2">
+        <a href="login.html" class="btn btn-outline-secondary btn-sm fw-bold">
+          <i class="fa-solid fa-arrow-right ms-1"></i> العودة إلى صفحة تسجيل الدخول
+        </a>
+      </div>
+    </form>
+
+    <div class="text-center mt-4 pt-3 border-top border-secondary border-opacity-50">
+      <small class="text-secondary">للدعم الفني الفوري: الإدارة العامة - شركة وادي بناء للنقل الدولي</small>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-app.js";
+    import { getAuth, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
+    import { firebaseConfig } from "./assets/js/firebase-config.js";
+
+    const auth = getAuth(initializeApp(firebaseConfig));
+
+    window.handleForgetSubmit = async function (e) {
+      e.preventDefault();
+      const email = document.getElementById('forgetEmail').value.trim().toLowerCase();
+      const alertBox = document.getElementById('forgetAlert');
+      const btn = document.getElementById('btnForgetSubmit');
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm ms-1"></span> جارٍ إرسال الرابط...';
+
+      try {
+        await sendPasswordResetEmail(auth, email);
+        alertBox.className = 'alert alert-success py-2 small fw-bold text-center';
+        alertBox.textContent = 'إذا كان البريد مرتبطاً بحساب، فسيصلك رابط إعادة تعيين كلمة المرور.';
+      } catch (err) {
+        console.error('Password reset email failed:', err);
+        alertBox.className = 'alert alert-warning py-2 small fw-bold text-center';
+        alertBox.textContent = err.code === 'auth/user-not-found'
+          ? 'إذا كان البريد مرتبطاً بحساب، فسيصلك رابط إعادة تعيين كلمة المرور.'
+          : 'تعذر إرسال رابط الاستعادة. تحقق من تفعيل Email/Password وإعداد النطاق في Firebase Console ثم حاول مجدداً.';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-paper-plane ms-1"></i> إرسال رابط الاستعادة';
+      }
+    };
+  </script>
+</body>
+</html>
