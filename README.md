@@ -5,6 +5,7 @@
 - `index.html`: التطبيق الموحد؛ يمكن فتح أقسامه مباشرة عبر صفحات التحويل المسماة أدناه.
 - `assets/css/app.css`: الأنماط المشتركة.
 - `assets/js/app.js`: منطق النظام ومزامنة Firebase.
+- `assets/js/firebase-config.js`: إعدادات مشروع Firebase المشتركة بين التطبيق وصفحات تسجيل الدخول والباركود.
 - `assets/js/transit-parser.js`: تحليل بيانات تأشيرات العبور، ويُحمّل بواسطة التطبيق.
 - `assets/js/module-shell.js`: يحوّل صفحات الأقسام إلى القسم المقابل داخل التطبيق الموحد.
 - `assets/images/wadi-bina-logo.jpeg`: شعار الشركة.

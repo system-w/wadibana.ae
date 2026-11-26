@@ -2,11 +2,11 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/13.4.0/firebas
 import { getDatabase, ref, onValue, set, get, remove, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-database.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, updatePassword, signOut } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-auth.js";
 import { getAnalytics, isSupported as isAnalyticsSupported } from "https://www.gstatic.com/firebasejs/13.4.0/firebase-analytics.js";
+import { firebaseConfig } from "./firebase-config.js";
 import { parseOmanEvisaText, validateTransitRecord } from "./transit-parser.js";
 
 const { jsPDF } = window.jspdf;
 
-const firebaseConfig = window.firebaseConfig;
 const OWNER_EMAIL_DOMAIN_EXCEPTION_UID = 'udn6FSQNEVd0v5HDfnF0mmCxmw53';
 
 let useFirebase = true;
